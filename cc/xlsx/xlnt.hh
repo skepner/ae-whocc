@@ -1,7 +1,8 @@
 #pragma once
 
-#include "utils/float.hh"
+#include "ext/filesystem.hh"
 #include "ext/xlnt.hh"
+#include "utils/float.hh"
 #include "xlsx/sheet.hh"
 
 // ----------------------------------------------------------------------
@@ -155,7 +156,7 @@ namespace ae::xlsx::inline v1
         class Doc
         {
           public:
-            Doc(std::string_view filename) : workbook_{::xlnt::path{std::string{filename}}} {}
+            Doc(const std::filesystem::path& filename) : workbook_{::xlnt::path{std::string{filename}}} {}
 
             size_t number_of_sheets() const { return workbook_.sheet_count(); }
             std::shared_ptr<ae::sheet::Sheet> sheet(size_t sheet_no) { return std::make_shared<Sheet>(workbook_.sheet_by_index(sheet_no)); }

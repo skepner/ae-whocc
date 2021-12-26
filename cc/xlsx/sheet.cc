@@ -1,6 +1,6 @@
 #include "ext/range-v3.hh"
 #include "xlsx/sheet.hh"
-// #include "acmacs-whocc/log.hh"
+#include "utils/log.hh"
 
 // ----------------------------------------------------------------------
 

@@ -43,6 +43,10 @@ fmt = dependency('fmt')
 subproject('range_v3')
 range_v3 = dependency('range_v3')
 
+zlib = dependency('zlib', version : '>=1.2.8')
+xz = dependency('liblzma')
+bzip2 = meson.get_compiler('cpp').find_library('bz2', required : false)
+
 include_cc = include_directories('./cc')
 
 # ----------------------------------------------------------------------
@@ -54,7 +58,8 @@ sources_py = [
 ]
 
 sources_ae_whocc = [
-  'cc/xlsx/sheet.cc',
+  'cc/xlsx/sheet.cc', 'cc/xlsx/csv-parser.cc',
+  'cc/utils/file.cc',
 ]
 
 # ----------------------------------------------------------------------
@@ -68,7 +73,7 @@ ae_whocc_py_lib = python3.extension_module(
   'ae_whocc',
   sources : sources_py + sources_ae_whocc,
   include_directories : include_cc,
-  dependencies : [dependency('python3'), xlnt, pybind11, fmt, range_v3],
+  dependencies : [dependency('python3'), xlnt, pybind11, fmt, range_v3, bzip2, zlib, xz],
   install : true)
 
 # https://gabmus.org/posts/python-unittest-meson/

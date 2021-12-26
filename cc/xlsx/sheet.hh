@@ -6,6 +6,7 @@
 #include <optional>
 
 #include "ext/fmt.hh"
+#include "ext/date.hh"
 #include "utils/named-type.hh"
 
 // ----------------------------------------------------------------------

@@ -3,9 +3,8 @@
 #include <variant>
 #include <memory>
 
-#include "acmacs-base/string-compare.hh"
 #include "xlsx/xlnt.hh"
-#include "acmacs-whocc/csv-parser.hh"
+#include "xlsx/csv-parser.hh"
 
 // ----------------------------------------------------------------------
 
@@ -37,12 +36,12 @@ namespace ae::xlsx::inline v1
             return std::visit([sheet_no](const auto& ptr) { return ptr->sheet(sheet_no); }, doc_);
         }
 
-      protected:
-        Doc(std::string_view filename)
+        // protected
+        Doc(const std::filesystem::path& filename)
         {
-            if (ae::string::endswith_ignore_case(filename, ".csv"))
+            if (const auto ext = filename.extension(); ext == ".csv")
                 doc_ = std::make_unique<csv::Doc>(filename);
-            else if (ae::string::endswith_ignore_case(filename, ".xlsx"))
+            else if (ext == ".xlsx")
                 doc_ = std::make_unique<XlDoc>(filename);
             else
                 throw Error{fmt::format("unsupported suffix in {}", filename)};
@@ -51,12 +50,12 @@ namespace ae::xlsx::inline v1
       private:
         std::variant<std::unique_ptr<XlDoc>, std::unique_ptr<csv::Doc>> doc_;
 
-        friend Doc open(std::string_view filename);
+        // friend std::shared_ptr<Doc> open(const std::filesystem::path& filename);
     };
 
     // ----------------------------------------------------------------------
 
-    inline Doc open(std::string_view filename) { return filename; }
+    inline std::shared_ptr<Doc> open(const std::filesystem::path& filename) { return std::make_shared<Doc>(filename); }
 
 } // namespace ae::xlsx::inline v1
 
