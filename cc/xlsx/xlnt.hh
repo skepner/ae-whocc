@@ -1,7 +1,7 @@
 #pragma once
 
-#include "acmacs-base/float.hh"
-#include "acmacs-base/xlnt.hh"
+#include "utils/float.hh"
+#include "ext/xlnt.hh"
 #include "xlsx/sheet.hh"
 
 // ----------------------------------------------------------------------
@@ -56,11 +56,11 @@ namespace ae::xlsx::inline v1
             sheet::nrow_t number_of_rows() const override { return number_of_rows_; }
             sheet::ncol_t number_of_columns() const override { return number_of_columns_; }
 
-            static inline date::year_month_day make_date(const ::xlnt::datetime& dt, sheet::nrow_t /*row*/, sheet::ncol_t /*col*/)
+            static inline std::chrono::year_month_day make_date(const ::xlnt::datetime& dt, sheet::nrow_t /*row*/, sheet::ncol_t /*col*/)
             {
                 // if (dt.hour || dt.minute || dt.second || dt.microsecond)
                 //     AD_WARNING("xlnt datetime at {:c}{} contains time: {}", col + 'A', row + 1, dt.to_string());
-                return date::year{dt.year} / date::month{static_cast<unsigned>(dt.month)} / dt.day;
+                return std::chrono::year{dt.year} / std::chrono::month{static_cast<unsigned>(dt.month)} / dt.day;
             }
 
             static inline bool is_date(const ::xlnt::cell& cell)

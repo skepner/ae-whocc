@@ -2,11 +2,11 @@
 
 #include <variant>
 #include <limits>
+#include <regex>
+#include <optional>
 
 #include "ext/fmt.hh"
-#include "acmacs-base/date.hh"
-#include "acmacs-base/regex.hh"
-#include "acmacs-base/named-type.hh"
+#include "utils/named-type.hh"
 
 // ----------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ namespace ae::sheet::inline v1
         };
     } // namespace cell
 
-    using cell_t = std::variant<cell::empty, cell::error, bool, std::string, double, long, date::year_month_day>;
+    using cell_t = std::variant<cell::empty, cell::error, bool, std::string, double, long, std::chrono::year_month_day>;
 
     inline bool is_empty(const cell_t& cell)
     {
@@ -41,7 +41,7 @@ namespace ae::sheet::inline v1
     {
         return std::visit(
             []<typename Content>(const Content&) {
-                if constexpr (std::is_same_v<Content, date::year_month_day>)
+                if constexpr (std::is_same_v<Content, std::chrono::year_month_day>)
                     return true;
                 else
                     return false;
@@ -132,7 +132,7 @@ namespace ae::sheet::inline v1
         bool maybe_titer(nrow_t row, ncol_t col) const { return maybe_titer(cell(row, col)); }
         column_range titer_range(nrow_t row) const; // returns column range, returns empty range if not found
 
-        cell_addr_t min_cell() const { return {nrow_t{0}, ncol_t{0}}; }
+        cell_addr_t min_cell() const { return {nrow_t{0ul}, ncol_t{0ul}}; }
         cell_addr_t max_cell() const { return {number_of_rows(), number_of_columns()}; }
 
         std::vector<cell_match_t> grep(const std::regex& rex, const cell_addr_t& min, const cell_addr_t& max) const;
@@ -160,8 +160,8 @@ template <> struct fmt::formatter<ae::sheet::cell_t> : fmt::formatter<ae::fmt_he
                     format_to(ctx.out(), "{}", arg);
                 else if constexpr (std::is_same_v<Content, std::string> || std::is_same_v<Content, double> || std::is_same_v<Content, long>)
                     format_to(ctx.out(), "{}", arg);
-                else if constexpr (std::is_same_v<Content, date::year_month_day>)
-                    format_to(ctx.out(), "{}", date::display(arg));
+                else if constexpr (std::is_same_v<Content, std::chrono::year_month_day>)
+                    format_to(ctx.out(), "{}", arg);
                 else
                     format_to(ctx.out(), "<*unknown*>");
             },

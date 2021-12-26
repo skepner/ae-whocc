@@ -49,13 +49,17 @@ size_t ae::sheet::v1::Sheet::size(const cell_t& cell) const
 
 // ----------------------------------------------------------------------
 
-#include "acmacs-base/global-constructors-push.hh"
+#pragma GCC diagnostic push
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wglobal-constructors"
+#pragma GCC diagnostic ignored "-Wexit-time-destructors"
+#endif
 
 // \xEF\xBC\x9C -> "<" unicode Fullwidth Less-Than Sign &#xFF1C; (NIID)
 // ">" and "," - perhaps typos in Crick tables
-static const std::regex re_titer{R"(^\s*(<|>|,|(?:<|>|\xEF\xBC\x9C)?\s*[1-9][0-9]{0,5}|N[DAT]|QNS|\*)\s*$)", ae::regex::icase};
+static const std::regex re_titer{R"(^\s*(<|>|,|(?:<|>|\xEF\xBC\x9C)?\s*[1-9][0-9]{0,5}|N[DAT]|QNS|\*)\s*$)", std::regex::icase | std::regex::ECMAScript | std::regex::optimize};
 
-#include "acmacs-base/diagnostics-pop.hh"
+#pragma GCC diagnostic pop
 
 bool ae::sheet::v1::Sheet::maybe_titer(const cell_t& cell) const
 {
