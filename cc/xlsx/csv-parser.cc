@@ -29,7 +29,7 @@ ae::xlsx::v1::csv::Sheet::Sheet(const std::filesystem::path& filename)
 
     const auto new_row = [&]() {
         convert_cell();
-        number_of_columns_ = std::max(number_of_columns_, sheet::ncol_t{data_.back().size()});
+        number_of_columns_ = std::max(number_of_columns_, xlsx::ncol_t{data_.back().size()});
         data_.emplace_back().emplace_back(std::string{});
     };
 
@@ -80,7 +80,7 @@ ae::xlsx::v1::csv::Sheet::Sheet(const std::filesystem::path& filename)
         }
     }
 
-    if (!data_.empty() && data_.back().size() <= 1 && number_of_columns_ > sheet::ncol_t{1})
+    if (!data_.empty() && data_.back().size() <= 1 && number_of_columns_ > xlsx::ncol_t{1})
         data_.erase(std::prev(data_.end()));
 
     // normalize number of columns

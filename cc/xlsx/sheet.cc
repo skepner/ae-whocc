@@ -4,7 +4,7 @@
 
 // ----------------------------------------------------------------------
 
-bool ae::sheet::v1::Sheet::matches(const std::regex& re, const cell_t& cell)
+bool ae::xlsx::v1::Sheet::matches(const std::regex& re, const cell_t& cell)
 {
     return std::visit(
         [&re, &cell]<typename Content>(const Content& arg) {
@@ -15,11 +15,11 @@ bool ae::sheet::v1::Sheet::matches(const std::regex& re, const cell_t& cell)
         },
         cell);
 
-} // ae::sheet::v1::Sheet::matches
+} // ae::xlsx::v1::Sheet::matches
 
 // ----------------------------------------------------------------------
 
-bool ae::sheet::v1::Sheet::matches(const std::regex& re, std::smatch& match, const cell_t& cell)
+bool ae::xlsx::v1::Sheet::matches(const std::regex& re, std::smatch& match, const cell_t& cell)
 {
     return std::visit(
         [&re, &match]<typename Content>(const Content& arg) {
@@ -30,11 +30,11 @@ bool ae::sheet::v1::Sheet::matches(const std::regex& re, std::smatch& match, con
         },
         cell);
 
-} // ae::sheet::v1::Sheet::matches
+} // ae::xlsx::v1::Sheet::matches
 
 // ----------------------------------------------------------------------
 
-size_t ae::sheet::v1::Sheet::size(const cell_t& cell) const
+size_t ae::xlsx::v1::Sheet::size(const cell_t& cell) const
 {
     return std::visit(
         []<typename Content>(const Content& arg) {
@@ -45,7 +45,7 @@ size_t ae::sheet::v1::Sheet::size(const cell_t& cell) const
         },
         cell);
 
-} // ae::sheet::v1::Sheet::size
+} // ae::xlsx::v1::Sheet::size
 
 // ----------------------------------------------------------------------
 
@@ -55,13 +55,13 @@ size_t ae::sheet::v1::Sheet::size(const cell_t& cell) const
 #pragma GCC diagnostic ignored "-Wexit-time-destructors"
 #endif
 
-// \xEF\xBC\x9C -> "<" unicode Fullwidth Less-Than Sign &#xFF1C; (NIID)
+// "\xEF\xBC\x9C" -> "<" unicode Fullwidth Less-Than Sign &#xFF1C; (NIID)
 // ">" and "," - perhaps typos in Crick tables
 static const std::regex re_titer{R"(^\s*(<|>|,|(?:<|>|\xEF\xBC\x9C)?\s*[1-9][0-9]{0,5}|N[DAT]|QNS|\*)\s*$)", std::regex::icase | std::regex::ECMAScript | std::regex::optimize};
 
 #pragma GCC diagnostic pop
 
-bool ae::sheet::v1::Sheet::maybe_titer(const cell_t& cell) const
+bool ae::xlsx::v1::Sheet::maybe_titer(const cell_t& cell) const
 {
     return std::visit(
         []<typename Content>(const Content& arg) {
@@ -80,11 +80,11 @@ bool ae::sheet::v1::Sheet::maybe_titer(const cell_t& cell) const
         },
         cell);
 
-} // ae::sheet::v1::Sheet::maybe_titer
+} // ae::xlsx::v1::Sheet::maybe_titer
 
 // ----------------------------------------------------------------------
 
-ae::sheet::v1::column_range ae::sheet::v1::Sheet::titer_range(nrow_t row) const
+ae::xlsx::v1::column_range ae::xlsx::v1::Sheet::titer_range(nrow_t row) const
 {
     range<ncol_t> longest;
     range<ncol_t> current;
@@ -112,17 +112,17 @@ ae::sheet::v1::column_range ae::sheet::v1::Sheet::titer_range(nrow_t row) const
     update();
     return longest;
 
-} // ae::sheet::v1::Sheet::titer_range
+} // ae::xlsx::v1::Sheet::titer_range
 
 // ----------------------------------------------------------------------
 
-std::vector<ae::sheet::cell_match_t> ae::sheet::v1::Sheet::grep(const std::regex& rex, const cell_addr_t& min, const cell_addr_t& max) const
+std::vector<ae::xlsx::cell_match_t> ae::xlsx::v1::Sheet::grep(const std::regex& rex, const cell_addr_t& min, const cell_addr_t& max) const
 {
     std::vector<cell_match_t> result;
     for (auto row = min.row; row < max.row; ++row) {
         for (auto col = min.col; col < max.col; ++col) {
             const auto cl = cell(row, col);
-            // AD_DEBUG("Sheet::grep {} {} \"{}\"", row, col, cl);
+            // AD_DEBUG("xlsx::grep {} {} \"{}\"", row, col, cl);
             std::smatch match;
             if (matches(rex, match, cl)) {
                 cell_match_t cm{.row = row, .col = col, .matches = std::vector<std::string>(match.size())};
@@ -133,18 +133,18 @@ std::vector<ae::sheet::cell_match_t> ae::sheet::v1::Sheet::grep(const std::regex
     }
     return result;
 
-} // ae::sheet::v1::Sheet::grep
+} // ae::xlsx::v1::Sheet::grep
 
 // ----------------------------------------------------------------------
 
-std::vector<ae::sheet::cell_match_t> ae::sheet::v1::Sheet::grepv(const std::regex& rex1, const std::regex& rex2, const cell_addr_t& min, const cell_addr_t& max) const
+std::vector<ae::xlsx::cell_match_t> ae::xlsx::v1::Sheet::grepv(const std::regex& rex1, const std::regex& rex2, const cell_addr_t& min, const cell_addr_t& max) const
 {
     std::vector<cell_match_t> result;
     for (auto row = min.row; row < max.row; ++row) {
         for (auto col = min.col; col < max.col; ++col) {
             const auto cl1 = cell(row, col);
             const auto cl2 = cell(row + nrow_t{1}, col);
-            // AD_DEBUG("Sheet::grep {} {} \"{}\"", row, col, cl);
+            // AD_DEBUG("xlsx::grep {} {} \"{}\"", row, col, cl);
             std::smatch match;
             if (matches(rex1, cl1) && matches(rex2, match, cl2)) {
                 cell_match_t cm{.row = row, .col = col, .matches = std::vector<std::string>(match.size())};
@@ -155,6 +155,6 @@ std::vector<ae::sheet::cell_match_t> ae::sheet::v1::Sheet::grepv(const std::rege
     }
     return result;
 
-} // ae::sheet::v1::Sheet::grepv
+} // ae::xlsx::v1::Sheet::grepv
 
 // ----------------------------------------------------------------------

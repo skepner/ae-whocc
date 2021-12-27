@@ -8,8 +8,9 @@ import ae_whocc
 
 def main(args: argparse.Namespace):
     for source in args.filenames:
-        workbook = ae_whocc.open_xlsx(source)
-        print(f"sheets: {workbook.number_of_sheets()}")
+        workbook = ae_whocc.xlsx.open(source)
+        for sheet_no in range(workbook.number_of_sheets()):
+            extractor = ae_whocc.xlsx.extractor(workbook.sheet(sheet_no))
 
 # ----------------------------------------------------------------------
 

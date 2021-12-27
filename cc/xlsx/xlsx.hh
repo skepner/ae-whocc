@@ -5,6 +5,7 @@
 
 #include "xlsx/xlnt.hh"
 #include "xlsx/csv-parser.hh"
+#include "xlsx/error.hh"
 
 // ----------------------------------------------------------------------
 
@@ -16,13 +17,6 @@ namespace ae::xlsx::inline v1
 
     // ----------------------------------------------------------------------
 
-    struct Error : public std::runtime_error
-    {
-        using std::runtime_error::runtime_error;
-    };
-
-    // ----------------------------------------------------------------------
-
     class Doc
     {
       public:
@@ -31,7 +25,7 @@ namespace ae::xlsx::inline v1
             return std::visit([](const auto& ptr) { return ptr->number_of_sheets(); }, doc_);
         }
 
-        std::shared_ptr<ae::sheet::Sheet> sheet(size_t sheet_no)
+        std::shared_ptr<Sheet> sheet(size_t sheet_no)
         {
             return std::visit([sheet_no](const auto& ptr) { return ptr->sheet(sheet_no); }, doc_);
         }
