@@ -18,7 +18,8 @@ def main(args: argparse.Namespace):
             print(f"sheet {sheet_no} name: \"{sheet.name()}\" {sheet.number_of_rows()}:{sheet.number_of_columns()}")
             detected = detect_m.detect(sheet)
             print(detected)
-            # extractor = ae_whocc.xlsx.extractor(sheet)
+            extractor = ae_whocc.xlsx.extractor(sheet, detected)
+            print(extractor)
 
 # ----------------------------------------------------------------------
 

@@ -97,74 +97,71 @@ static const std::string_view LineageYamagata{"YAMAGATA"};
 
 // ----------------------------------------------------------------------
 
-std::shared_ptr<ae::xlsx::Extractor> ae::xlsx::v1::extractor_factory(std::shared_ptr<Sheet> sheet, Extractor::warn_if_not_found winf)
+std::shared_ptr<ae::xlsx::Extractor> ae::xlsx::v1::extractor_factory(std::shared_ptr<Sheet> sheet, const detect_result_t& detected, Extractor::warn_if_not_found winf)
 {
-    return {};
+    try {
+        std::unique_ptr<Extractor> extractor;
+        if (detected.ignore) {
+            AD_INFO("Sheet \"{}\": ignored on request in cell A1", sheet->name());
+            return nullptr;
+        }
 
-    // const auto detected = acmacs::whocc_xlsx::v1::py_sheet_detect(sheet);
-    // try {
-    //     std::unique_ptr<Extractor> extractor;
-    //     if (detected.ignore) {
-    //         AD_INFO("Sheet \"{}\": ignored on request in cell A1", sheet->name());
-    //         return nullptr;
-    //     }
+        if (sheet->number_of_rows() < nrow_t{5} || sheet->number_of_columns() < ncol_t{5}) {
+            AD_INFO("Sheet \"{}\": is too small, ignored", sheet->name());
+            return nullptr;
+        }
 
-    //     if (sheet->number_of_rows() < nrow_t{5} || sheet->number_of_columns() < ncol_t{5}) {
-    //         AD_INFO("Sheet \"{}\": is too small, ignored", sheet->name());
-    //         return nullptr;
-    //     }
-
-    //     AD_INFO("{}", detected);
-    //     if (detected.sheet_format == "ac-21") {
-    //         extractor = std::make_unique<ExtractorAc21>(sheet);
-    //         extractor->lab(detected.lab);
-    //         extractor->subtype(detected.subtype);
-    //         extractor->lineage(detected.lineage);
-    //         extractor->assay(detected.assay);
-    //         extractor->rbc(detected.rbc);
-    //     }
-    //     else if (detected.lab == "CDC") {
-    //         extractor = std::make_unique<ExtractorCDC>(sheet);
-    //         extractor->subtype(detected.subtype);
-    //         extractor->lineage(detected.lineage);
-    //         extractor->assay(detected.assay);
-    //         extractor->rbc(detected.rbc);
-    //     }
-    //     else if (detected.lab == "CRICK") {
-    //         if (detected.assay == "HI") {
-    //             extractor = std::make_unique<ExtractorCrick>(sheet);
-    //             extractor->subtype(detected.subtype);
-    //             extractor->lineage(detected.lineage);
-    //             extractor->rbc(detected.rbc);
-    //         }
-    //         else if (detected.assay == "PRN")
-    //             extractor = std::make_unique<ExtractorCrickPRN>(sheet);
-    //         else
-    //             throw std::exception{};
-    //     }
-    //     else if (detected.lab == "NIID") {
-    //         extractor = std::make_unique<ExtractorNIID>(sheet);
-    //         extractor->subtype(detected.subtype);
-    //         extractor->lineage(detected.lineage);
-    //         extractor->assay(detected.assay);
-    //         extractor->rbc(detected.rbc);
-    //     }
-    //     else if (detected.lab == "VIDRL") {
-    //         extractor = std::make_unique<ExtractorVIDRL>(sheet);
-    //         extractor->subtype(detected.subtype);
-    //         extractor->lineage(detected.lineage);
-    //         extractor->assay(detected.assay);
-    //         extractor->rbc(detected.rbc);
-    //     }
-    //     else
-    //         throw std::exception{};
-    //     extractor->date(detected.date);
-    //     extractor->preprocess(winf);
-    //     return extractor;
-    // }
-    // catch (std::exception& err) {
-    //     throw std::runtime_error{fmt::format("Sheet \"{}\": no specific extractor found, detected: {} (exception: {})", sheet->name(), detected, err)};
-    // }
+        AD_INFO("{}", detected);
+        if (detected.sheet_format == "ac-21") {
+            extractor = std::make_unique<ExtractorAc21>(sheet);
+            extractor->lab(detected.lab);
+            extractor->subtype(detected.subtype);
+            extractor->lineage(detected.lineage);
+            extractor->assay(detected.assay);
+            extractor->rbc(detected.rbc);
+        }
+        else if (detected.lab == "CDC") {
+            extractor = std::make_unique<ExtractorCDC>(sheet);
+            extractor->subtype(detected.subtype);
+            extractor->lineage(detected.lineage);
+            extractor->assay(detected.assay);
+            extractor->rbc(detected.rbc);
+        }
+        else if (detected.lab == "CRICK") {
+            if (detected.assay == "HI") {
+                extractor = std::make_unique<ExtractorCrick>(sheet);
+                extractor->subtype(detected.subtype);
+                extractor->lineage(detected.lineage);
+                extractor->rbc(detected.rbc);
+            }
+            else if (detected.assay == "PRN")
+                extractor = std::make_unique<ExtractorCrickPRN>(sheet);
+            else
+                throw std::exception{};
+        }
+        else if (detected.lab == "NIID") {
+            extractor = std::make_unique<ExtractorNIID>(sheet);
+            extractor->subtype(detected.subtype);
+            extractor->lineage(detected.lineage);
+            extractor->assay(detected.assay);
+            extractor->rbc(detected.rbc);
+        }
+        else if (detected.lab == "VIDRL") {
+            extractor = std::make_unique<ExtractorVIDRL>(sheet);
+            extractor->subtype(detected.subtype);
+            extractor->lineage(detected.lineage);
+            extractor->assay(detected.assay);
+            extractor->rbc(detected.rbc);
+        }
+        else
+            throw std::exception{};
+        extractor->date(detected.date);
+        extractor->preprocess(winf);
+        return extractor;
+    }
+    catch (std::exception& err) {
+        throw std::runtime_error{fmt::format("Sheet \"{}\": no specific extractor found, detected: {} (exception: {})", sheet->name(), detected, err.what())};
+    }
 
 } // ae::xlsx::v1::extractor_factory
 

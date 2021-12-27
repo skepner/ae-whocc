@@ -1,8 +1,43 @@
 #include "py/module.hh"
+#include "utils/log.hh"
 #include "xlsx/xlsx.hh"
 #include "xlsx/sheet-extractor.hh"
 
 // ======================================================================
+
+namespace ae::xlsx::inline v1
+{
+    inline detect_result_t sheet_detected(pybind11::object detected)
+    {
+        detect_result_t result;
+        std::string date;
+        for (const auto key : detected) {
+            if (const auto key_s = key.cast<std::string>(); key_s == "lab")
+                result.lab = detected[key].cast<std::string>();
+            else if (key_s == "assay")
+                result.assay = detected[key].cast<std::string>();
+            else if (key_s == "subtype")
+                result.subtype = detected[key].cast<std::string>();
+            else if (key_s == "lineage")
+                result.lineage = detected[key].cast<std::string>();
+            else if (key_s == "rbc")
+                result.rbc = detected[key].cast<std::string>();
+            else if (key_s == "date")
+                date = detected[key].cast<std::string>();
+            else if (key_s == "sheet_format")
+                result.sheet_format = detected[key].cast<std::string>();
+            else if (key_s == "ignore")
+                result.ignore = detected[key].cast<bool>();
+            else
+                AD_WARNING("py function detect returned unrecognized key/value: \"{}\": {}", key_s, static_cast<std::string>(pybind11::str(detected[key])));
+        }
+        if (!date.empty())
+            result.date = ae::date::from_string(date, date::allow_incomplete::no, date::throw_on_error::no, result.lab == "CDC" ? date::month_first::yes : date::month_first::no);
+        return result;
+    }
+} // namespace ae::xlsx::inline v1
+
+// ----------------------------------------------------------------------
 
 PYBIND11_MODULE(ae_whocc, mdl)
 {
@@ -19,8 +54,10 @@ PYBIND11_MODULE(ae_whocc, mdl)
 
     xlsx_submodule.def(
         "extractor",
-        [](std::shared_ptr<ae::xlsx::Sheet> sheet, bool winf) { return extractor_factory(sheet, winf ? ae::xlsx::Extractor::warn_if_not_found::yes : ae::xlsx::Extractor::warn_if_not_found::no); },
-        "sheet"_a, "warn_if_not_found"_a = true);
+        [](std::shared_ptr<ae::xlsx::Sheet> sheet, pybind11::object detected, bool winf) {
+            return extractor_factory(sheet, ae::xlsx::sheet_detected(detected), winf ? ae::xlsx::Extractor::warn_if_not_found::yes : ae::xlsx::Extractor::warn_if_not_found::no);
+        },
+        "sheet"_a, "detected"_a, "warn_if_not_found"_a = true);
 
     pybind11::class_<ae::xlsx::Doc, std::shared_ptr<ae::xlsx::Doc>>(xlsx_submodule, "Doc") //
         .def("number_of_sheets", &ae::xlsx::Doc::number_of_sheets)                         //

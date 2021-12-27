@@ -34,6 +34,18 @@ namespace ae::xlsx::inline v1
         bool boosted{false};
     };
 
+    struct detect_result_t
+    {
+        bool ignore{false};
+        std::string lab{};
+        std::string assay{};
+        std::string subtype{};
+        std::string lineage{};
+        std::string rbc{};
+        std::string sheet_format{}; // "ac-21"
+        std::chrono::year_month_day date{ae::date::invalid_date};
+    };
+
     // ----------------------------------------------------------------------
 
     class Extractor
@@ -129,7 +141,7 @@ namespace ae::xlsx::inline v1
 
     };
 
-    std::shared_ptr<Extractor> extractor_factory(std::shared_ptr<Sheet> sheet, Extractor::warn_if_not_found winf);
+    std::shared_ptr<Extractor> extractor_factory(std::shared_ptr<Sheet> sheet, const detect_result_t& detected, Extractor::warn_if_not_found winf);
 
     // ----------------------------------------------------------------------
 
@@ -302,5 +314,18 @@ namespace ae::xlsx::inline v1
     };
 
 } // namespace ae::xlsx::inline v1
+
+// ----------------------------------------------------------------------
+
+template <> struct fmt::formatter<ae::xlsx::detect_result_t> : fmt::formatter<ae::fmt_helper::default_formatter>
+{
+    template <typename FormatCtx> auto format(const ae::xlsx::detect_result_t& detected, FormatCtx& ctx)
+    {
+        if (detected.ignore)
+            return format_to(ctx.out(), "[Sheet IGNORE]");
+        return format_to(ctx.out(), "[{} {}{} {} {} {}{}]", detected.lab, detected.subtype, detected.lineage, detected.assay, detected.rbc, detected.date,
+                         detected.sheet_format.empty() ? detected.sheet_format : fmt::format(" ({})", detected.sheet_format));
+    }
+};
 
 // ----------------------------------------------------------------------
