@@ -95,6 +95,10 @@ PYBIND11_MODULE(ae_whocc, mdl)
         .def_readonly("matches", &ae::xlsx::cell_match_t::matches)                                                                             //
         .def("__repr__", [](const ae::xlsx::cell_match_t& cm) { return fmt::format("<cell_match_t: {}:{} {}>", cm.row, cm.col, cm.matches); }) //
         ;
+
+    pybind11::class_<ae::xlsx::Extractor, std::shared_ptr<ae::xlsx::Extractor>>(xlsx_submodule, "Extractor")           //
+        ;
+
 }
 
 // ======================================================================
