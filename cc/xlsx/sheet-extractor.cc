@@ -439,7 +439,7 @@ void ae::xlsx::v1::Extractor::find_antigen_date_column(warn_if_not_found winf)
 {
     const auto is_date = [](const auto& cell) {
         // VIDRL uses string values DD/MM/YYYY for antigen dates
-        return ae::xlsx::is_date(cell) || (ae::xlsx::is_string(cell) && date::from_string(fmt::format("{}", cell), date::allow_incomplete::no, date::throw_on_error::no).ok());
+        return ae::xlsx::is_date(cell) || (ae::xlsx::is_string(cell) && ae::date::from_string(fmt::format("{}", cell), ae::date::allow_incomplete::no, ae::date::throw_on_error::no).ok());
     };
 
     antigen_date_column_ = ::find_column(sheet(), antigen_rows_, is_date);

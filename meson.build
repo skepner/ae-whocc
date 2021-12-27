@@ -59,7 +59,7 @@ sources_py = [
 
 sources_ae_whocc = [
   'cc/xlsx/sheet.cc', 'cc/xlsx/sheet-extractor.cc', 'cc/xlsx/csv-parser.cc',
-  'cc/utils/file.cc',
+  'cc/utils/file.cc', 'cc/ext/date.cc',
 ]
 
 # ----------------------------------------------------------------------
