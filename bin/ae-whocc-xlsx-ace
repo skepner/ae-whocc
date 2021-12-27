@@ -3,10 +3,15 @@
 import sys, os, argparse, traceback
 from pathlib import Path
 import ae_whocc
+import ae.whocc.load_module
 
 # ----------------------------------------------------------------------
 
 def main(args: argparse.Namespace):
+    if not (whocc_tables_dir := os.environ.get("WHOCC_TABLES_DIR")):
+        raise RuntimeError(f"""WHOCC_TABLES_DIR env var not set""")
+    detect_m = ae.whocc.load_module.load(Path(whocc_tables_dir, "ae-whocc-detect.py"))
+    print(detect_m, dir(detect_m))
     for source in args.filenames:
         workbook = ae_whocc.xlsx.open(source)
         for sheet_no in range(workbook.number_of_sheets()):
